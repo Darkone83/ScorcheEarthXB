@@ -22,6 +22,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="help.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="jukebox.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
     <ClCompile Include="options.cpp" />
@@ -53,6 +54,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="help.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="jukebox.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="minimp3.h" />
     <ClInclude Include="options.h" />

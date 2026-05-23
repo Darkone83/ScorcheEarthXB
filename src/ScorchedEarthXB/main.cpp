@@ -38,6 +38,7 @@
 #include "setup.h"
 #include "store.h"
 #include "results.h"
+#include "jukebox.h"
 
 /* =========================================================================
    Game state
@@ -53,7 +54,8 @@ typedef enum
     STATE_SETUP,      /* pre-game: tank / color / AI config   */
     STATE_STORE,      /* weapon store (pre-game + between rounds) */
     STATE_GAME,
-    STATE_RESULTS,    /* round / game-over results screen     */
+    STATE_RESULTS,
+    STATE_JUKEBOX,
     STATE_CREDITS,
     STATE_SHUTDOWN
 } GameState;
@@ -201,6 +203,7 @@ static void State_Update(WORD wPressed)
         if (nAction == MENU_ACTION_NEWGAME) { s_bResuming = 0; StartFadeOut(STATE_SETUP); }
         if (nAction == MENU_ACTION_OPTIONS) StartFadeOut(STATE_OPTIONS);
         if (nAction == MENU_ACTION_HELP) StartFadeOut(STATE_HELP);
+        if (nAction == MENU_ACTION_JUKEBOX) StartFadeOut(STATE_JUKEBOX);
         if (nAction == MENU_ACTION_EXIT) StartFadeOut(STATE_CREDITS);
         if (nAction == MENU_ACTION_BACK) StartFadeOut(STATE_TITLE);
         break;
@@ -212,7 +215,7 @@ static void State_Update(WORD wPressed)
         break;
 
     case STATE_HELP:
-        if (wPressed & BTN_B) StartFadeOut(STATE_MENU);
+        if (Help_Update(wPressed)) StartFadeOut(STATE_MENU);
         break;
 
     case STATE_SETUP:
@@ -265,6 +268,10 @@ static void State_Update(WORD wPressed)
             StartFadeOut(STATE_SHUTDOWN);
         break;
 
+    case STATE_JUKEBOX:
+        if (Jukebox_Update(wPressed)) StartFadeOut(STATE_MENU);
+        break;
+
     default:
         break;
     }
@@ -286,6 +293,7 @@ static void State_Draw(void)
     case STATE_STORE:    Store_Draw();      break;
     case STATE_GAME:     Game_Draw();       break;
     case STATE_RESULTS:  Results_Draw();    break;
+    case STATE_JUKEBOX:  Jukebox_Draw();    break;
     case STATE_CREDITS:  Credits_Draw();    break;
     default:                                break;
     }
@@ -334,6 +342,7 @@ static void State_Enter(GameState eNew)
         break;
 
     case STATE_HELP:
+        Help_Init();
         break;
 
     case STATE_SETUP:
@@ -374,6 +383,11 @@ static void State_Enter(GameState eNew)
         Results_Init();
         break;
 
+    case STATE_JUKEBOX:
+        Jukebox_Init();
+        Audio_MusicStop();
+        break;
+
     case STATE_CREDITS:
         Credits_Init();
         break;
@@ -402,13 +416,32 @@ void __cdecl main(void)
     InitInput();
     Audio_Init();
     Sfx_Init();
+
     Config_Load();
     Config_Apply();
 
-    /* Play intro immediately -- no texture wait before the XMV */
+    /*
+        Preload title/menu textures while the intro XMV is playing.
+
+        This should hide the slow DVD/file reads for splash.dds and ui.dds
+        behind the intro video instead of forcing the user to wait after it.
+    */
+    Tex_PreloadQueue("D:\\tex\\splash.dds");
+    Tex_PreloadQueue("D:\\tex\\ui.dds");
+    Tex_PreloadStart();
+
+    /* Play intro while texture preload runs */
     Video_PlayBlocking("D:\\xmv\\Intro.xmv");
 
-    /* Textures load after the video -- sequential DVD reads, no competition */
+    /*
+        Finish preload before UI_Init().
+
+        UI_Init() should then call Tex_Load(), which can consume the preloaded
+        data instead of doing synchronous file reads here.
+    */
+    Tex_PreloadFinish();
+
+    /* UI should now initialize from preloaded splash/ui textures */
     ShowLoadingScreen();
     UI_Init();
 

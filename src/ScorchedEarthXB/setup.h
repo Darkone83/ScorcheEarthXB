@@ -13,10 +13,17 @@
 
 typedef struct
 {
-    int nTankType;          /* 0-4                          */
-    int nColorIdx;          /* 0-7 index into k_playerColors */
-    int nAICount;           /* 1-3                          */
-    int nAIDiff[SETUP_MAX_AI];  /* 0=Shooter 1=Cyborg 2=Killer */
+    /* Player */
+    int nTankType;
+    int nColorIdx;
+    /* AI */
+    int nAICount;
+    int nAIDiff[SETUP_MAX_AI];
+    /* Match options */
+    int nRounds;        /* 0=1  1=3  2=5  3=10        */
+    int nStartCash;     /* 0=10k 1=25k 2=50k 3=100k   */
+    int nWindStrength;  /* 0=None 1=Light 2=Normal 3=Strong */
+    int nTerrainType;   /* 0=Random 1=Flat 2=Hills 3=Mountains */
 } SetupConfig;
 
 extern SetupConfig g_setup;

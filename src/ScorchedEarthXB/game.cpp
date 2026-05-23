@@ -117,6 +117,12 @@ static DWORD  s_dwPhaseStart = 0;
 static DWORD  s_dwRumbleEnd = 0;
 static int    s_bMusicStarted = 0;
 static int    s_bActive = 0;
+static int    s_nMaxRounds = 3;
+
+/* Lookup tables for setup option indices */
+static const int k_roundVals[4] = { 1,     3,     5,     10 };
+static const int k_cashVals[4] = { 10000, 25000, 50000, 100000 };
+static const int k_windMax[4] = { 0,     4,     10,    20 };
 
 /* Round result text */
 static char   s_szResult[64] = "";
@@ -383,6 +389,7 @@ static void NextTurn(const char* pszMsg)
     else
     {
         s_ePhase = GPHASE_AIMING;
+        s_dwPhaseStart = GetTickCount();
     }
 }
 
@@ -398,13 +405,20 @@ void Game_PreInit(void)
     Particles_Init();
     Terrain_Init();
     Tanks_Init();
-    Player_Init(&s_players[0], 0, "XBOX",
+    Player_Init(&s_players[0], 0, "Player 1",
         g_setup.nTankType, 0, 0);
     s_players[0].nColorIdx = g_setup.nColorIdx;
     s_nPlayerCount = g_setup.nAICount + GAME_HUMAN_COUNT;
+    s_nMaxRounds = k_roundVals[g_setup.nRounds < 4 ? g_setup.nRounds : 1];
     s_nRound = 0;
     s_bGameOver = 0;
-    s_bActive = 0;   /* not active until Game_Init */
+    s_bActive = 0;
+
+    /* Apply starting cash from setup */
+    {
+        int cash = k_cashVals[g_setup.nStartCash < 4 ? g_setup.nStartCash : 1];
+        s_players[0].nCash = cash;
+    }
 }
 
 void Game_Init(void)
@@ -422,7 +436,7 @@ void Game_Init(void)
         Tanks_Init();
         /* Human player -- preserve inventory from store if PreInit ran */
         if (s_players[0].nCash == 0)
-            Player_Init(&s_players[0], 0, "XBOX",
+            Player_Init(&s_players[0], 0, "Player 1",
                 g_setup.nTankType, 0, 0);
     }
 
@@ -437,9 +451,9 @@ void Game_Init(void)
     }
 
     s_nPlayerCount = g_setup.nAICount + GAME_HUMAN_COUNT;
+    s_nMaxRounds = k_roundVals[g_setup.nRounds < 4 ? g_setup.nRounds : 1];
     s_nRound = 0;
     s_bGameOver = 0;
-    s_bMusicStarted = 0;
     s_bActive = 1;
 
     Game_NewRound();
@@ -479,12 +493,23 @@ void Game_NewRound(void)
     s_bRoundOver = 0;
     s_szResult[0] = '\0';
 
+    /* Game over once max rounds reached */
+    if (s_nMaxRounds > 0 && s_nRound > s_nMaxRounds)
+    {
+        s_bGameOver = 1;
+        s_bRoundOver = 1;
+        return;
+    }
+
     for (i = 0; i < s_nPlayerCount; i++)
         Player_ResetForRound(&s_players[i], s_nPlayerCount);
 
-    Terrain_NewRound();
+    Terrain_NewRound(g_setup.nTerrainType);
 
-    s_nWind = Rand_Int(&s_rand, MAX_WIND * 2 + 1) - MAX_WIND;
+    {
+        int maxW = k_windMax[g_setup.nWindStrength < 4 ? g_setup.nWindStrength : 2];
+        s_nWind = maxW > 0 ? Rand_Int(&s_rand, maxW * 2 + 1) - maxW : 0;
+    }
     Player_PlaceAll(s_players, s_nPlayerCount, &s_rand);
 
     Terrain_Upload();
@@ -551,15 +576,30 @@ void Game_Update(WORD wPressed)
     {
         Player* pP = &s_players[s_nActive];
 
-        /* Rate-limited continuous aim for held buttons */
-        if (now - s_dwAimTime >= AIM_RATE_MS)
+        /* Hold-to-accelerate aiming */
         {
-            WORD wRaw = GetButtons();
-            if (wRaw & BTN_DPAD_LEFT) { pP->nAngle--; if (pP->nAngle < 0)   pP->nAngle = 0; }
-            if (wRaw & BTN_DPAD_RIGHT) { pP->nAngle++; if (pP->nAngle > 179) pP->nAngle = 179; }
-            if (wRaw & BTN_DPAD_UP) { pP->nPower += 10; if (pP->nPower > pP->nPowerLimit) pP->nPower = pP->nPowerLimit; }
-            if (wRaw & BTN_DPAD_DOWN) { pP->nPower -= 10; if (pP->nPower < PHYS_MIN_POWER)  pP->nPower = PHYS_MIN_POWER; }
-            s_dwAimTime = now;
+            WORD  wRaw = GetButtons();
+            DWORD held = now - s_dwAimTime;
+            int   step;
+            DWORD rate;
+
+            if (held > 1500u) { step = 5; rate = 16u; }
+            else if (held > 600u) { step = 2; rate = 35u; }
+            else { step = 1; rate = AIM_RATE_MS; }
+
+            if (now - s_dwAimTime >= rate)
+            {
+                if (wRaw & BTN_DPAD_LEFT) { pP->nAngle -= step; if (pP->nAngle < 0)   pP->nAngle = 0; }
+                if (wRaw & BTN_DPAD_RIGHT) { pP->nAngle += step; if (pP->nAngle > 179) pP->nAngle = 179; }
+                if (wRaw & BTN_DPAD_UP) { pP->nPower += step * 10; if (pP->nPower > pP->nPowerLimit) pP->nPower = pP->nPowerLimit; }
+                if (wRaw & BTN_DPAD_DOWN) { pP->nPower -= step * 10; if (pP->nPower < PHYS_MIN_POWER)  pP->nPower = PHYS_MIN_POWER; }
+                if (wRaw & (BTN_DPAD_LEFT | BTN_DPAD_RIGHT | BTN_DPAD_UP | BTN_DPAD_DOWN))
+                    s_dwAimTime = now;
+            }
+
+            /* Reset timer when no direction held so next press starts slow */
+            if (!(wRaw & (BTN_DPAD_LEFT | BTN_DPAD_RIGHT | BTN_DPAD_UP | BTN_DPAD_DOWN)))
+                s_dwAimTime = now;
         }
 
         /* Weapon cycle (White = prev, Black = next) */
@@ -987,6 +1027,7 @@ static void DrawWindIndicator(void)
 
 static void DrawHUD(void)
 {
+    Font* pBig = UI_GetFontLarge();
     Font* pSmall = UI_GetFontSmall();
     float dw = (float)g_dwDisplayW;
     float dh = (float)g_dwDisplayH;
@@ -994,12 +1035,87 @@ static void DrawHUD(void)
     char    buf[64];
     float   tw;
     int     i;
+    DWORD   now = GetTickCount();
 
     /* Wind -- centred at very top */
     DrawWindIndicator();
 
-    /* Player health bars + names
-       Layout: name at y=16, bar at y=30 (10px tall) */
+    /* ── Round counter -- top right ──────────────────────────────── */
+    if (s_nMaxRounds > 0)
+    {
+        char buf2[12];
+        int  j = 0;
+        buf2[j++] = 'R'; buf2[j++] = 'n'; buf2[j++] = 'd'; buf2[j++] = ' ';
+        if (s_nRound >= 10) buf2[j++] = (char)('0' + s_nRound / 10);
+        buf2[j++] = (char)('0' + s_nRound % 10);
+        buf2[j++] = '/';
+        if (s_nMaxRounds >= 10) buf2[j++] = (char)('0' + s_nMaxRounds / 10);
+        buf2[j++] = (char)('0' + s_nMaxRounds % 10);
+        buf2[j] = '\0';
+        {
+            float tw2 = Font_Width(pSmall, buf2);
+            Font_Draw(pSmall, buf2, dw - tw2 - 6.f, 4.f, 0xFF888888u);
+        }
+    }
+
+    /* ── Turn banner / AI thinking text ─────────────────────────── */
+    {
+        DWORD elapsed = now - s_dwPhaseStart;
+
+        if (s_ePhase == GPHASE_AIMING && elapsed < 1800u)
+        {
+            /* "YOUR TURN" fades in then holds */
+            float tw2 = Font_Width(pBig, "YOUR TURN");
+            Font_Draw(pBig, "YOUR TURN",
+                (dw - tw2) * 0.5f, dh * 0.42f, 0xFFFFCC00u);
+        }
+        else if (s_ePhase == GPHASE_AI_DELAY)
+        {
+            /* "KILLER is aiming..." */
+            char  abuf[48];
+            int   j = 0;
+            const char* nm = pP->szName;
+            const char* suf = " is aiming...";
+            while (*nm && j < 40) abuf[j++] = *nm++;
+            while (*suf && j < 47) abuf[j++] = *suf++;
+            abuf[j] = '\0';
+            tw = Font_Width(pSmall, abuf);
+            Font_Draw(pSmall, abuf, (dw - tw) * 0.5f, dh * 0.44f,
+                Player_GetColor(pP));
+        }
+    }
+
+    /* ── Active tank marker (blinking coloured bar above tank) ─────── */
+    if ((s_ePhase == GPHASE_AIMING || s_ePhase == GPHASE_AI_DELAY)
+        && pP->bAlive)
+    {
+        if ((now >> 9) & 1)  /* blink every ~512ms */
+        {
+            typedef struct { float x, y, z, rhw; DWORD c; } MV;
+            float fScale = (float)g_dwDisplayW / 640.f;
+            float mw = (float)pP->nWidth;
+            float mx = (float)pP->nX;
+            float my = (float)pP->nY - 6.f * fScale;
+            float mh = 4.f * fScale;
+            DWORD mc = Player_GetColor(pP);
+            MV    v[4];
+
+            v[0].x = mx;    v[0].y = my;    v[0].z = 0; v[0].rhw = 1; v[0].c = mc;
+            v[1].x = mx + mw; v[1].y = my;    v[1].z = 0; v[1].rhw = 1; v[1].c = mc;
+            v[2].x = mx;    v[2].y = my + mh; v[2].z = 0; v[2].rhw = 1; v[2].c = mc;
+            v[3].x = mx + mw; v[3].y = my + mh; v[3].z = 0; v[3].rhw = 1; v[3].c = mc;
+
+            g_pd3dDevice->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+            g_pd3dDevice->SetTexture(0, NULL);
+            g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+            g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+            g_pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+            g_pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(MV));
+            g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
+        }
+    }
+
+    /* Player health bars + names */
     {
         float barW = dw / (float)s_nPlayerCount - 6.f;
         float nameY = 52.f;

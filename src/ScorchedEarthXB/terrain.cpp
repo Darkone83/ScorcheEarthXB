@@ -372,34 +372,65 @@ static void ChooseBackground(void)
    Base height ~55% from top, smoothed random walk with sine variation.
 ========================================================================= */
 
-static void Generate(void)
+static void Generate(int nTerrainType)
 {
     int* heights = (int*)malloc((size_t)s_nW * sizeof(int));
     int   x, y;
     int   h;
-    float base = (float)s_nH * 0.55f;
-    float amp = (float)s_nH * 0.22f;   /* max hill height */
-    float walk = 0.0f;
+    float base, amp, stepScale;
+    int   smoothPasses;
 
     if (!heights) return;
 
-    /* Pass 1: random walk seeded from LCG */
-    heights[0] = (int)base;
-    for (x = 1; x < s_nW; x++)
+    /* Style parameters */
+    switch (nTerrainType)
     {
-        walk += ((float)RandInt(21) - 10.0f) * 0.5f;
-        if (walk > amp) walk = amp;
-        if (walk < -amp) walk = -amp;
-        heights[x] = (int)(base + walk);
+    case 1: /* Flat */
+        base = (float)s_nH * 0.65f;
+        amp = (float)s_nH * 0.04f;
+        stepScale = 0.3f;
+        smoothPasses = 6;
+        break;
+    case 2: /* Hills */
+        base = (float)s_nH * 0.55f;
+        amp = (float)s_nH * 0.18f;
+        stepScale = 0.6f;
+        smoothPasses = 4;
+        break;
+    case 3: /* Mountains */
+        base = (float)s_nH * 0.50f;
+        amp = (float)s_nH * 0.38f;
+        stepScale = 1.4f;
+        smoothPasses = 2;
+        break;
+    default: /* Random */
+        base = (float)s_nH * 0.55f;
+        amp = (float)s_nH * 0.22f;
+        stepScale = 1.0f;
+        smoothPasses = 3;
+        break;
     }
 
-    /* Pass 2: smooth (3-tap box filter, 3 iterations) */
+    /* Pass 1: random walk */
+    {
+        float walk = 0.0f;
+        heights[0] = (int)base;
+        for (x = 1; x < s_nW; x++)
+        {
+            walk += ((float)RandInt(21) - 10.0f) * 0.5f * stepScale;
+            if (walk > amp) walk = amp;
+            if (walk < -amp) walk = -amp;
+            heights[x] = (int)(base + walk);
+        }
+    }
+
+    /* Pass 2: smooth */
     {
         int   iter, i;
         int* tmp = (int*)malloc((size_t)s_nW * sizeof(int));
         if (tmp)
         {
-            for (iter = 0; iter < 3; iter++)
+            for (iter = 0; iter < smoothPasses; iter++)
             {
                 for (i = 0; i < s_nW; i++)
                 {
@@ -413,11 +444,11 @@ static void Generate(void)
         }
     }
 
-    /* Pass 3: clamp -- keep ground visible, keep sky visible */
+    /* Pass 3: clamp */
     for (x = 0; x < s_nW; x++)
     {
-        int minH = s_nH / 5;           /* always some sky */
-        int maxH = s_nH * 9 / 10;     /* always some ground */
+        int minH = s_nH / 8;
+        int maxH = s_nH * 9 / 10;
         if (heights[x] < minH) heights[x] = minH;
         if (heights[x] > maxH) heights[x] = maxH;
     }
@@ -499,7 +530,7 @@ void Terrain_Shutdown(void)
     s_nH = 0;
 }
 
-void Terrain_NewRound(void)
+void Terrain_NewRound(int nTerrainType)
 {
     DWORD newW = g_dwDisplayW;
     DWORD newH = g_dwDisplayH;
@@ -518,7 +549,7 @@ void Terrain_NewRound(void)
 
     s_nRandSeed = GetTickCount();
     ChooseBackground();
-    Generate();
+    Generate(nTerrainType);
 
     /* Build height profile for ground polygon rendering */
     ScanHeights(0, s_nW - 1);

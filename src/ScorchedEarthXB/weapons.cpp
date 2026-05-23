@@ -20,28 +20,51 @@
    Weapon definition table  (matches scorch.js WEAPONS[] exactly)
 ========================================================================= */
 
+const char* k_weaponDesc[WEAPON_COUNT] =
+{
+    "Standard explosive. Reliable and always free.",
+    "Small nuclear blast. Good all-round opener.",
+    "Large nuclear detonation. Heavy splash damage.",
+    "Rains debris upward from impact. Buries targets.",
+    "Rolls along terrain toward the target.",
+    "Larger roller. Follows terrain contours.",
+    "Massive roller. Devastating on flat ground.",
+    "Bores into the ground. Digs under cover.",
+    "Deeper burrowing charge. Collapses terrain.",
+    "Maximum depth burrowing. Cave collapse.",
+    "Scatters 6 sub-explosions randomly on impact.",
+    "Scatters 10 sub-explosions. Wide area denial.",
+    "Wide vertical burn. Strips terrain columns.",
+    "Double-width napalm. Massive terrain strip.",
+    "Splits into 5 warheads in a spread pattern.",
+    "9 warheads spread wide. Covers a huge area.",
+    "Instant beam of destruction. Cuts through anything.",
+    "Absorbs 75% of incoming damage for one round.",
+    "Prevents fall damage when knocked off a ledge.",
+};
+
+/*  name               radius  ammo   price   kind          inf  parts  dur   bw   bdmg */
 const WeaponDef k_weapons[WEAPON_COUNT] =
 {
-    /*  name               radius  ammo   price   kind          inf  parts  dur   bw   bdmg */
-      { "Missile",           10,   999,       0,  WKIND_SIMPLE,   1,   0,    0,   0,   0   },
-      { "Baby Nuke",         60,     0,   20000,  WKIND_SIMPLE,   0,   0,    0,   0,   0   },
-      { "Nuke",             100,     0,   40000,  WKIND_SIMPLE,   0,   0,    0,   0,   0   },
-      { "Sand Bomb",         60,     0,    5000,  WKIND_SAND,     0,   0,    0,   0,   0   },
-      { "Baby Roller",       15,     0,    7000,  WKIND_ROLLER,   0,   0,    0,   0,   0   },
-      { "Roller",            30,     0,   13000,  WKIND_ROLLER,   0,   0,    0,   0,   0   },
-      { "Heavy Roller",      55,     0,   20000,  WKIND_ROLLER,   0,   0,    0,   0,   0   },
-      { "Baby Digger",       24,     0,    2000,  WKIND_DIGGER,   0,   0, 1000,   0,   0   },
-      { "Digger",            38,     0,    4000,  WKIND_DIGGER,   0,   0, 3000,   0,   0   },
-      { "Heavy Digger",      54,     0,    6000,  WKIND_DIGGER,   0,   0, 5000,   0,   0   },
-      { "Funky Bomb",        38,     0,   30000,  WKIND_FUNKY,    0,   6,    0,   0,   0   },
-      { "Funky Nuke",        62,     0,   50000,  WKIND_FUNKY,    0,  10,    0,   0,   0   },
-      { "Napalm",           140,     0,   10000,  WKIND_NAPALM,   0,   0,    0,   0,   0   },
-      { "Hot Napalm",       280,     0,   20000,  WKIND_NAPALM,   0,   0,    0,   0,   0   },
-      { "MIRV",              25,     0,   35000,  WKIND_MIRV,     0,   5,    0,   0,   0   },
-      { "Death Head",        55,     0,   90000,  WKIND_MIRV,     0,   9,    0,   0,   0   },
-      { "Laser",              0,     0,   25000,  WKIND_LASER,    0,   0,    0,   5, 880   },
-      { "Shield",             0,     0,   15000,  WKIND_SHIELD,   0,   0,    0,   0,   0   },
-      { "Parachute",          0,     0,    3000,  WKIND_CHUTE,    0,   0,    0,   0,   0   },
+  { "Missile",           10,   999,       0,  WKIND_SIMPLE,   1,   0,    0,   0,   0   },
+  { "Baby Nuke",         60,     0,   20000,  WKIND_SIMPLE,   0,   0,    0,   0,   0   },
+  { "Nuke",             100,     0,   40000,  WKIND_SIMPLE,   0,   0,    0,   0,   0   },
+  { "Sand Bomb",         60,     0,    5000,  WKIND_SAND,     0,   0,    0,   0,   0   },
+  { "Baby Roller",       15,     0,    7000,  WKIND_ROLLER,   0,   0,    0,   0,   0   },
+  { "Roller",            30,     0,   13000,  WKIND_ROLLER,   0,   0,    0,   0,   0   },
+  { "Heavy Roller",      55,     0,   20000,  WKIND_ROLLER,   0,   0,    0,   0,   0   },
+  { "Baby Digger",       24,     0,    2000,  WKIND_DIGGER,   0,   0, 1000,   0,   0   },
+  { "Digger",            38,     0,    4000,  WKIND_DIGGER,   0,   0, 3000,   0,   0   },
+  { "Heavy Digger",      54,     0,    6000,  WKIND_DIGGER,   0,   0, 5000,   0,   0   },
+  { "Funky Bomb",        38,     0,   30000,  WKIND_FUNKY,    0,   6,    0,   0,   0   },
+  { "Funky Nuke",        62,     0,   50000,  WKIND_FUNKY,    0,  10,    0,   0,   0   },
+  { "Napalm",           140,     0,   10000,  WKIND_NAPALM,   0,   0,    0,   0,   0   },
+  { "Hot Napalm",       280,     0,   20000,  WKIND_NAPALM,   0,   0,    0,   0,   0   },
+  { "MIRV",              25,     0,   35000,  WKIND_MIRV,     0,   5,    0,   0,   0   },
+  { "Death Head",        55,     0,   90000,  WKIND_MIRV,     0,   9,    0,   0,   0   },
+  { "Laser",              0,     0,   25000,  WKIND_LASER,    0,   0,    0,   5, 880   },
+  { "Shield",             0,     0,   15000,  WKIND_SHIELD,   0,   0,    0,   0,   0   },
+  { "Parachute",          0,     0,    3000,  WKIND_CHUTE,    0,   0,    0,   0,   0   },
 };
 
 /* =========================================================================

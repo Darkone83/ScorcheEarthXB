@@ -99,6 +99,9 @@
     <ClCompile Include="results.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="jukebox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Media\Copy Assets Here.txt">
@@ -182,6 +185,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="results.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jukebox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -82,6 +82,9 @@ extern const WeaponDef k_weapons[WEAPON_COUNT];
 #define WID_SHIELD          17   /* activates shield at round start */
 #define WID_PARACHUTE       18   /* grants parachutes at round start */
 
+/* Weapon descriptions (also used by store and help screens) */
+extern const char* k_weaponDesc[WEAPON_COUNT];
+
 /* ── Terrain modification ──
    Apply the weapon's terrain carve at (x, y).
    Does NOT call Terrain_Drop or Terrain_MarkDirty -- caller owns those.   */

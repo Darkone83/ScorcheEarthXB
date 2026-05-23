@@ -176,6 +176,8 @@ static DWORD               s_dwMusicPos = 0;
 static mp3dec_t             s_mp3Dec;
 
 static HANDLE               s_hMusicThread = NULL;
+static int                  s_nCurrentTrack = 0;
+static DWORD                s_dwTrackStart = 0;
 static LONG                 s_bMusicStop = 0;
 static LONG                 s_bEOF = 0;
 static int                  s_bLoopTrack = 0;
@@ -346,6 +348,8 @@ static void StartStream(int nTrack, int bLoop)
 
     Audio_MusicStop();
 
+    s_nCurrentTrack = nTrack;
+    s_dwTrackStart = GetTickCount();
     BuildTrackPath(szPath, nTrack);
 
     hFile = CreateFile(szPath, GENERIC_READ, FILE_SHARE_READ,
@@ -450,6 +454,25 @@ void Audio_Shutdown(void)
 }
 
 /* ── Music entry points ── */
+
+void Audio_MusicPlayTrack(int n)
+{
+    if (n < 0) n = 0;
+    if (n > 6) n = 6;
+    s_bInGameplay = 0;
+    StartStream(n, 1 /* loop */);
+}
+
+int Audio_MusicGetTrack(void)
+{
+    return s_nCurrentTrack;
+}
+
+DWORD Audio_MusicGetElapsedMs(void)
+{
+    if (!Audio_MusicIsPlaying()) return 0;
+    return GetTickCount() - s_dwTrackStart;
+}
 
 void Audio_MusicPlayTitle(void)
 {

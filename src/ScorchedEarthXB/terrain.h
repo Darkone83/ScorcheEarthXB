@@ -47,7 +47,7 @@
 
 void  Terrain_Init(void);
 void  Terrain_Shutdown(void);
-void  Terrain_NewRound(void);
+void  Terrain_NewRound(int nTerrainType);  /* 0=Random 1=Flat 2=Hills 3=Mountains */
 void  Terrain_Upload(void);
 void  Terrain_PreDraw(void);   /* call BEFORE Render_BeginFrame */
 void  Terrain_Draw(void);   /* no-op -- terrain already in back buffer */

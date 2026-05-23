@@ -12,7 +12,7 @@
 #include "render.h"
 #include "input.h"
 
-#define STORE_VISIBLE  9
+#define STORE_VISIBLE  7   /* rows visible at once -- room for description panel */
 
 static int s_nSel = 0;
 static int s_nScroll = 0;
@@ -37,8 +37,10 @@ static void IStr(int n, char* buf, int cap)
 
 void Store_Init(void)
 {
-    s_nSel = 0;
-    s_nScroll = 0;
+    /* Only reset cursor position on a fresh pre-game visit.
+       Between rounds keep the cursor where the player left it. */
+    if (s_nSel >= WEAPON_COUNT) s_nSel = 0;
+    if (s_nScroll >= WEAPON_COUNT) s_nScroll = 0;
 }
 
 int Store_Update(WORD wPressed)
@@ -188,22 +190,60 @@ void Store_Draw(void)
     }
 
     /* ── Scroll hint ──────────────────────────────────────────────── */
-    if (WEAPON_COUNT > STORE_VISIBLE)
     {
-        char idx[4], tot[4], comb[12];
-        int  j = 0, k = 0;
-        IStr(s_nSel + 1, idx, 4);
-        IStr(WEAPON_COUNT, tot, 4);
-        while (idx[k]) comb[j++] = idx[k++];
-        comb[j++] = '/'; k = 0;
-        while (tot[k]) comb[j++] = tot[k++];
-        comb[j] = '\0';
+        float listY = dh * 0.26f;
+        float rowH = (dh * 0.62f) / (float)STORE_VISIBLE;
+        float listEnd = listY + (float)STORE_VISIBLE * rowH;
+        float panY = listEnd + 10.f;
+
+        if (WEAPON_COUNT > STORE_VISIBLE)
         {
-            float tw = Font_Width(pSmall, comb);
-            Font_Draw(pSmall, comb, (dw - tw) * 0.5f, dh * 0.91f, 0xFF555555u);
+            char idx[4], tot[4], comb[12];
+            int  j = 0, k = 0;
+            IStr(s_nSel + 1, idx, 4);
+            IStr(WEAPON_COUNT, tot, 4);
+            while (idx[k]) comb[j++] = idx[k++];
+            comb[j++] = '/'; k = 0;
+            while (tot[k]) comb[j++] = tot[k++];
+            comb[j] = '\0';
+            {
+                float tw = Font_Width(pSmall, comb);
+                Font_Draw(pSmall, comb, (dw - tw) * 0.5f, listEnd + 2.f, 0xFF555555u);
+            }
+        }
+
+        /* ── Selected weapon description panel ───────────────────── */
+        {
+            float tw;
+
+            /* Separator line */
+            {
+                typedef struct { float x, y, z, rhw; DWORD c; }BV;
+                BV v[4]; DWORD lc = 0xFF333333u;
+                v[0].x = dw * 0.02f; v[0].y = panY - 2; v[0].z = 0; v[0].rhw = 1; v[0].c = lc;
+                v[1].x = dw * 0.98f; v[1].y = panY - 2; v[1].z = 0; v[1].rhw = 1; v[1].c = lc;
+                v[2].x = dw * 0.02f; v[2].y = panY;   v[2].z = 0; v[2].rhw = 1; v[2].c = lc;
+                v[3].x = dw * 0.98f; v[3].y = panY;   v[3].z = 0; v[3].rhw = 1; v[3].c = lc;
+                g_pd3dDevice->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+                g_pd3dDevice->SetTexture(0, NULL);
+                g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+                g_pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(BV));
+                g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
+            }
+
+            Font_Draw(pSmall, k_weapons[s_nSel].pszName, dw * 0.04f, panY + 6.f, 0xFFFFCC00u);
+            Font_Draw(pSmall, k_weaponDesc[s_nSel], dw * 0.04f, panY + 24.f, 0xFFAAAAAAu);
+
+            if (!k_weapons[s_nSel].bInfinite)
+            {
+                char pbuf[16];
+                pbuf[0] = '$'; IStr(k_weapons[s_nSel].nPrice, pbuf + 1, 12);
+                tw = Font_Width(pSmall, pbuf);
+                Font_Draw(pSmall, pbuf, dw * 0.96f - tw, panY + 6.f, 0xFF88FF88u);
+            }
         }
     }
 
     /* ── Hints ────────────────────────────────────────────────────── */
-    Font_Draw(pSmall, "A=Buy   X=Sell(50%)   B=Done", dw * 0.04f, dh * 0.94f, 0xFF555555u);
+    Font_Draw(pSmall, "A=Buy   X=Sell(50%)   B=Done", dw * 0.04f, dh * 0.97f, 0xFF555555u);
 }

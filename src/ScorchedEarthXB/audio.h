@@ -33,12 +33,15 @@ void Audio_Update(void);   /* call once per frame -- drives playlist    */
 void Audio_Shutdown(void);
 
 /* ── Music -- named entry points ── */
-void Audio_MusicPlayTitle(void);   /* track0, loops                    */
-void Audio_MusicPlayGameplay(void);   /* shuffle tracks 1-5, auto-advance */
-void Audio_MusicPlayCredits(void);   /* track6, plays once               */
-void Audio_MusicStop(void);
-void Audio_MusicVolume(int nVol);   /* 0-100                        */
-int  Audio_MusicIsPlaying(void);
+void  Audio_MusicPlayTitle(void);
+void  Audio_MusicPlayGameplay(void);
+void  Audio_MusicPlayCredits(void);
+void  Audio_MusicPlayTrack(int n);      /* play specific track 0-6, loops  */
+void  Audio_MusicStop(void);
+void  Audio_MusicVolume(int nVol);   /* 0-100                           */
+int   Audio_MusicIsPlaying(void);
+int   Audio_MusicGetTrack(void);       /* current track index             */
+DWORD Audio_MusicGetElapsedMs(void);       /* ms since track started          */
 
 /* ── SFX ── */
 int  Audio_SfxLoad(const char* pszPath);   /* returns slot or -1       */

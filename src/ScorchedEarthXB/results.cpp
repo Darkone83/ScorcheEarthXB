@@ -123,8 +123,8 @@ void Results_Draw(void)
         Font_Draw(pSmall, "PLAYER", dw * 0.03f, hy, 0xFFAA9977u);
         Font_Draw(pSmall, "HEALTH", dw * 0.28f, hy, 0xFFAA9977u);
         Font_Draw(pSmall, "KILLS", dw * 0.60f, hy, 0xFFAA9977u);
-        Font_Draw(pSmall, "EARNED", dw * 0.74f, hy, 0xFFAA9977u);
-        Font_Draw(pSmall, "STATUS", dw * 0.90f, hy, 0xFFAA9977u);
+        Font_Draw(pSmall, "EARNED", dw * 0.72f, hy, 0xFFAA9977u);
+        Font_Draw(pSmall, "TOTAL", dw * 0.86f, hy, 0xFFAA9977u);
     }
 
     /* ── Player rows ─────────────────────────────────────────────── */
@@ -166,14 +166,14 @@ void Results_Draw(void)
         IStr(pP->nKills, buf, 8);
         Font_Draw(pSmall, buf, dw * 0.60f, ry, col);
 
-        /* Earned cash */
+        /* Earned cash this round */
         buf[0] = '$'; IStr(pP->nEarnedCash, buf + 1, 10);
-        Font_Draw(pSmall, buf, dw * 0.74f, ry, 0xFF88FF88u);
+        Font_Draw(pSmall, buf, dw * 0.72f, ry, 0xFF88FF88u);
 
-        /* Status */
-        Font_Draw(pSmall, pP->bAlive ? "ALIVE" : "DEAD",
-            dw * 0.90f, ry,
-            pP->bAlive ? 0xFF88FF88u : 0xFFFF4444u);
+        /* Total cash */
+        buf[0] = '$'; IStr(pP->nCash, buf + 1, 10);
+        Font_Draw(pSmall, buf, dw * 0.86f, ry,
+            pP->bAlive ? 0xFFFFCC00u : 0xFF666666u);
     }
 
     /* ── Hint ─────────────────────────────────────────────────────── */

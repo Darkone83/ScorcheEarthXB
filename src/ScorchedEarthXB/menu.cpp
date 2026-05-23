@@ -18,12 +18,13 @@ static const MenuItem k_itemsBase[] =
     { "NEW GAME", MENU_ACTION_NEWGAME },
     { "OPTIONS",  MENU_ACTION_OPTIONS },
     { "HELP",     MENU_ACTION_HELP    },
+    { "JUKEBOX",  MENU_ACTION_JUKEBOX },
     { "EXIT",     MENU_ACTION_EXIT    },
 };
 
 static const MenuItem k_resume = { "RESUME", MENU_ACTION_RESUME };
 
-#define BASE_COUNT  4
+#define BASE_COUNT  5
 
 static int s_nSel = 0;
 static int s_nCount = 0;

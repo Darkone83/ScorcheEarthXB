@@ -19,8 +19,9 @@
 #define MENU_ACTION_NEWGAME  2
 #define MENU_ACTION_OPTIONS  3
 #define MENU_ACTION_HELP     4
-#define MENU_ACTION_EXIT     5
-#define MENU_ACTION_BACK     6   /* B / Back -- return to title */
+#define MENU_ACTION_JUKEBOX  5
+#define MENU_ACTION_EXIT     6
+#define MENU_ACTION_BACK     7
 
 void Menu_Init(void);
 int  Menu_Update(WORD wPressed);   /* returns MENU_ACTION_* */
