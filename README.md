@@ -1,6 +1,6 @@
 # ScorchedEarthXB
 
-<div align =center>
+<div align=center>
 
 <img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/menu.jpg" width=450><img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/game.jpg" width=450>
 
@@ -28,21 +28,23 @@ The game features cel-shaded 3D tanks rendered over a 2D destructible terrain, a
 
 ## Features
 
-- **Destructible terrain** — pixel-level terrain deformation with gravity drop after each explosion
+- **Destructible terrain** — pixel-level terrain deformation with gravity drop after each explosion; four terrain styles (Random, Flat, Hills, Mountains)
 - **19 weapons** — Missile, Baby Nuke, Nuke, Napalm, Hot Napalm, Baby Roller, Roller, Heavy Roller, Sand Bomb, Funky Bomb, Funky Nuke, MIRV, Death Head, Laser, Baby Digger, Digger, Heavy Digger, Shield, Parachute
 - **3 AI difficulty levels** — Shooter, Cyborg, Killer; two-pass angle/power grid search with per-difficulty inaccuracy and weapon preference curves
 - **5 tank types** — Recon, Medium, Assault, Artillery, Siege; each with distinct silhouette and barrel profile
-- **Weapon store** — buy and sell weapons between rounds using cash earned from kills
+- **Match options** — configurable rounds, starting cash, wind strength, and terrain type per session
+- **Weapon store** — buy and sell weapons between rounds using cash earned from kills; descriptions for every weapon
 - **Cel-shaded 3D tanks** — orthographic projection, toon shading with outline pass, per-player colors
 - **Point sprite particle system** — explosion sparks and dirt debris with gravity and alpha fade
 - **MP3 music streaming** — minimp3-based ring buffer engine; title, gameplay (random shuffle from 5 tracks), and credits tracks
-- **Original soundtrack** — composed by Darkone83
+- **Original soundtrack** — composed by Darkone83; playable in the in-game Jukebox
 - **25 sampled SFX** — per-weapon fire sounds, explosion variants scaled by radius, terrain impact, tank destruction, and looping battlefield ambience
 - **Controller rumble** — scaled by explosion radius, configurable in options
 - **Wall types** — None, Wrap, or Bounce projectile behavior at screen edges
-- **Persistent config** — music volume, SFX volume, rumble toggle, wall type saved to `D:\ScorchedXB.cfg`
+- **Persistent config** — music volume, SFX volume, rumble toggle, wall type saved to `ScorchedXB.cfg`
 - **Intro XMV** — WMV2 video with ADPCM audio via xmvtool
-- **Credits sequence** — scrolling credits with dedicated music track
+- **Credits sequence** — scrolling nebula credits with dedicated music track
+- **4-page help system** — Controls, Gameplay, Weapons, and Tank Types reference screens
 
 ---
 
@@ -116,25 +118,35 @@ D:\
     └── ui.dds               (menu/options background)
 ```
 
+---
+
 ## Controls
 
 ### Menu / Options
 | Button | Action |
 |---|---|
 | D-Pad Up / Down | Navigate |
-| D-Pad Left / Right | Change value (options) |
+| D-Pad Left / Right | Change value |
 | A | Confirm / select |
 | B | Back |
 
 ### In-Game
 | Button | Action |
 |---|---|
-| D-Pad Left / Right | Adjust angle |
-| D-Pad Up / Down | Adjust power |
+| D-Pad Left / Right | Adjust angle (hold to accelerate) |
+| D-Pad Up / Down | Adjust power (hold to accelerate) |
 | Black | Next weapon |
 | White | Previous weapon |
 | A | Fire |
 | Back | Return to menu |
+
+### Jukebox
+| Button | Action |
+|---|---|
+| Black / D-Pad Right | Next track |
+| White / D-Pad Left | Previous track |
+| A | Play / Stop |
+| B | Back |
 
 ---
 
@@ -145,15 +157,15 @@ All source files are flat in the project root.
 | File | Description |
 |---|---|
 | `main.cpp` | Entry point, state machine (Video → Title → Menu → Setup → Store → Game → Results → Credits) |
-| `render.h/cpp` | D3D8 device init, display mode detection |
+| `render.h/cpp` | D3D8 device init, display mode detection, vsync |
 | `input.h` | XInput wrapper (provided) |
 | `font.h/cpp` | Custom 5×7 "Combat Stencil" bitmap font, no external dependencies |
 | `ui.h/cpp` | Texture backgrounds, font size wrappers, title screen |
-| `tex.h/cpp` | DDS texture loading via D3DX |
+| `tex.h/cpp` | DDS texture loading via D3DX, background preload cache |
 | `video.h/cpp` | Blocking XMV playback via XMVDecoder |
 | `audio.h/cpp` | minimp3 MP3 streaming engine, DirectSound ring buffer |
 | `sfx.h/cpp` | 25-slot DirectSound SFX pool |
-| `terrain.h/cpp` | Procedural terrain generation and destruction |
+| `terrain.h/cpp` | Procedural terrain generation (4 styles) and destruction |
 | `random.h/cpp` | LCG RNG matching scorch.js Random class exactly |
 | `player.h/cpp` | Player state, tank placement, turret position |
 | `tanks.h/cpp` | Cel-shaded 3D tank rendering (orthographic, toon + outline) |
@@ -162,13 +174,14 @@ All source files are flat in the project root.
 | `particles.h/cpp` | Fixed-pool point sprite particle system |
 | `ai.h/cpp` | Two-pass grid search AI with Gaussian weapon selection |
 | `game.h/cpp` | Game loop, turn management, SFX/rumble wiring |
-| `setup.h/cpp` | Pre-game setup screen (tank type, color, AI config) |
+| `setup.h/cpp` | Pre-game setup screen (tank, color, AI config, match options) |
 | `store.h/cpp` | Weapon store (pre-game loadout and between-round restock) |
 | `results.h/cpp` | Round and game-over results screen |
+| `jukebox.h/cpp` | In-game jukebox with track display and progress bar |
 | `menu.h/cpp` | Main menu |
-| `help.h/cpp` | Controls reference screen |
-| `options.h/cpp` | Options screen |
-| `credits.h/cpp` | Scrolling credits sequence |
+| `help.h/cpp` | 4-page help system (Controls, Gameplay, Weapons, Tanks) |
+| `options.h/cpp` | Options screen (volume, rumble, wall type) |
+| `credits.h/cpp` | Scrolling nebula credits sequence |
 | `config.h/cpp` | Persistent config read/write (`D:\ScorchedXB.cfg`) |
 | `ftol2.cpp` | `_ftol2_sse` stub for MSVC 2003 (build with `/GL` disabled) |
 | `Convert_to_XMV.bat` | Intro video conversion script |
