@@ -1,4 +1,16 @@
-# ScorchedXB
+# ScorchedEarthXB
+
+<div align =center>
+
+<img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/menu.jpg" width=450><img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/game.jpg" width=450>
+
+</div>
+
+<div align=center>
+
+<img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/Darkone83.png">
+
+</div>
 
 An original Xbox port of **Scorched Earth 2000** (scorch.js v1.2), built with the RXDK/XDK toolchain in C89-compatible C++.
 
