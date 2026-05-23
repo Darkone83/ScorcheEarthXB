@@ -2,7 +2,7 @@
 
 <div align=center>
 
-<img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/menu.jpg" width=450><img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/game.jpg" width=450>
+<img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/menu.jpg" width=400><img src="https://github.com/Darkone83/ScorcheEarthXB/blob/main/img/game.jpg" width=400>
 
 </div>
 
