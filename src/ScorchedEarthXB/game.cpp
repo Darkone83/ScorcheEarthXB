@@ -46,9 +46,9 @@
 
 #define MAX_WIND          10
 #define AIM_RATE_MS       50u   /* angle/power change rate when held */
-#define EXPL_FRAMES       28    /* explosion animation length (frames) */
-#define ROUND_PAUSE_MS    2200u /* pause after round ends */
-#define AI_DELAY_MS       600u  /* brief pause before AI fires */
+#define EXPL_FRAMES       40    /* explosion animation length (frames)    */
+#define ROUND_PAUSE_MS    3000u /* pause after round ends                 */
+#define AI_DELAY_MS       1200u /* brief pause before AI fires            */
 
 /* =========================================================================
    Game phase

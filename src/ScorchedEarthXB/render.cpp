@@ -77,7 +77,7 @@ HRESULT Render_Init(void)
     pp.MultiSampleType = D3DMULTISAMPLE_NONE;
     pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
     pp.EnableAutoDepthStencil = FALSE;
-    pp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+    pp.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;   /* vsync 60fps */
     pp.Flags = dwPresentFlags;
 
     Direct3DCreate8(D3D_SDK_VERSION);

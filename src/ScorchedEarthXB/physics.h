@@ -38,7 +38,7 @@
 
 #define PHYS_GRAVITY          9.8f
 #define PHYS_STEP_SIZE        0.1f
-#define PHYS_STEPS_PER_FRAME  2
+#define PHYS_STEPS_PER_FRAME  1
 #define PHYS_MAX_FRAMES       1800
 #define PHYS_MAX_POWER        1000
 #define PHYS_MIN_POWER        200
