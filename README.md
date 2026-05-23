@@ -184,7 +184,6 @@ All source files are flat in the project root.
 | `credits.h/cpp` | Scrolling nebula credits sequence |
 | `config.h/cpp` | Persistent config read/write (`D:\ScorchedXB.cfg`) |
 | `ftol2.cpp` | `_ftol2_sse` stub for MSVC 2003 (build with `/GL` disabled) |
-| `Convert_to_XMV.bat` | Intro video conversion script |
 
 ---
 
