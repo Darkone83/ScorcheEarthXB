@@ -81,7 +81,7 @@ D:\
 ├── ScorchedXB.xbe
 ├── ScorchedXB.cfg          (written on first options save)
 ├── xmv\
-│   └── Intro.xmv           (converted with Convert_to_XMV.bat)
+│   └── Intro.xmv
 ├── tracks\
 │   ├── track0.mp3           (title music, loops)
 │   ├── track1.mp3           (gameplay, random pick)
@@ -182,7 +182,7 @@ All source files are flat in the project root.
 | `help.h/cpp` | 4-page help system (Controls, Gameplay, Weapons, Tanks) |
 | `options.h/cpp` | Options screen (volume, rumble, wall type) |
 | `credits.h/cpp` | Scrolling nebula credits sequence |
-| `config.h/cpp` | Persistent config read/write (`D:\ScorchedXB.cfg`) |
+| `config.h/cpp` | Persistent config read/write (`ScorchedXB.cfg`) |
 | `ftol2.cpp` | `_ftol2_sse` stub for MSVC 2003 (build with `/GL` disabled) |
 
 ---
