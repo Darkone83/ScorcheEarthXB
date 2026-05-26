@@ -2,7 +2,7 @@
 
 **Presented by Team Resurgent / Darkone83**
 
-The ScorchedXB relay server handles matchmaking and game traffic between Xbox clients. It is a lightweight Python TCP server requiring no database or external dependencies.
+The ScorchedEarthXB relay server handles matchmaking and game traffic between Xbox clients. It is a lightweight Python TCP server requiring no database or external dependencies.
 
 ---
 
@@ -38,8 +38,8 @@ All settings are at the top of `relay_server.py`:
 | `MAX_ROOMS` | `16` | Maximum concurrent rooms. |
 | `MAX_PLAYERS` | `4` | Maximum human players per room (2–4). |
 | `MIN_PLAYERS` | `2` | Minimum humans required before host can start. |
-| `LOBBY_TIMEOUT_S` | `600` | Seconds before an empty room is auto-closed. |
-| `RECV_TIMEOUT_S` | `30` | Socket idle timeout before a client is considered dropped. |
+| `LOBBY_TIMEOUT_S` | `0` | Seconds before an empty room is auto-closed. |
+| `RECV_TIMEOUT_S` | `90` | Socket idle timeout before a client is considered dropped. |
 | `LOG_FILE` | `relay_server.log` | Log file path. |
 | `LOG_TO_FILE` | `True` | Write log to file. |
 | `LOG_TO_STDOUT` | `True` | Print log to console. |
@@ -66,12 +66,12 @@ Create `/etc/systemd/system/scorchedxb-relay.service`:
 
 ```ini
 [Unit]
-Description=ScorchedXB Relay Server
+Description=ScorchedEarthXB Relay Server
 After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 /opt/scorchedxb/relay_server.py
-WorkingDirectory=/opt/scorchedxb
+WorkingDirectory=/opt/scorchedearthxb
 Restart=always
 RestartSec=5
 StandardOutput=journal
@@ -97,7 +97,7 @@ systemctl status scorchedxb-relay
 The server is verbose by design. Every connection, packet, and room event is logged with a timestamp and level tag.
 
 ```
-[2026-05-26 18:00:00] [INFO ] ScorchedXB Relay Server starting
+[2026-05-26 18:00:00] [INFO ] ScorchedEarthXB Relay Server starting
 [2026-05-26 18:00:00] [INFO ] Listen address : 0.0.0.0:10053
 [2026-05-26 18:00:00] [INFO ] Listening on 0.0.0.0:10053
 [2026-05-26 18:00:01] [INFO ] CONNECT: Darkone83 connected from 1.2.3.4:50001

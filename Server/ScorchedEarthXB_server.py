@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-relay_server.py -- ScorchedXB TCP relay server.
+relay_server.py -- ScorchedEarthXB TCP relay server.
 Presented by Team Resurgent / Darkone83
 
 Verbose diagnostic logging to stdout and relay_server.log.
@@ -579,7 +579,7 @@ def client_thread(client: Client):
 def main():
     log_open()
     log("=" * 60)
-    log(f"ScorchedXB Relay Server starting")
+    log(f"ScorchedEarthXB Relay Server starting")
     log(f"  Listen address : {HOST}:{PORT}")
     log(f"  Max rooms      : {MAX_ROOMS}")
     log(f"  Max players    : {MAX_PLAYERS}")
