@@ -20,7 +20,7 @@ The ScorchedEarthXB relay server handles matchmaking and game traffic between Xb
 # Clone or copy relay_server.py to your server
 # No pip installs required -- standard library only
 
-python3 relay_server.py
+python3 ScorchedEarthXB_server.py
 ```
 
 The server starts immediately and logs to both stdout and `relay_server.log` in the same directory.
@@ -29,7 +29,7 @@ The server starts immediately and logs to both stdout and `relay_server.log` in 
 
 ## Configuration
 
-All settings are at the top of `relay_server.py`:
+All settings are at the top of `ScorchedEarthXB_server.py`:
 
 | Setting | Default | Description |
 |---|---|---|
