@@ -24,12 +24,12 @@ import sys
 # =============================================================================
 
 HOST            = "0.0.0.0"    # Listen address (0.0.0.0 = all interfaces)
-PORT            = 10053         # Must match XBNET_DEFAULT_PORT in xb_net.h
+PORT            = 20056         # Must match XBNET_DEFAULT_PORT in xb_net.h
 MAX_ROOMS       = 16            # Max concurrent rooms
 MAX_PLAYERS     = 4             # Max humans per room (2-4)
 MIN_PLAYERS     = 2             # Min humans required to start
-LOBBY_TIMEOUT_S = 0             # Seconds before empty room is auto-closed
-RECV_TIMEOUT_S  = 90            # Socket recv timeout (keepalive detection)
+LOBBY_TIMEOUT_S = 600           # Seconds before empty room is auto-closed
+RECV_TIMEOUT_S  = 30            # Socket recv timeout (keepalive detection)
 LOG_FILE        = "relay_server.log"
 LOG_TO_FILE     = True          # Also write log to file
 LOG_TO_STDOUT   = True          # Print log to console
@@ -347,8 +347,6 @@ def handle_join(client, pkt):
 
     room_id    = pkt[2]
     max_humans = pkt[3]
-    client.tank_type = pkt[4]
-    client.color_idx = pkt[5]
 
     if room_id == 0 and max_humans >= 2:
         # Create new room
@@ -360,14 +358,16 @@ def handle_join(client, pkt):
         room.max_humans = min(max(max_humans, 2), MAX_PLAYERS)
 
         if len(pkt) >= 14:
-            room.n_ai        = pkt[6]
-            room.ai_diff[0]  = pkt[7]
-            room.ai_diff[1]  = pkt[8]
-            room.ai_diff[2]  = pkt[9]
-            room.n_rounds    = pkt[10]
-            room.start_cash  = pkt[11]
-            room.wind_str    = pkt[12]
-            room.terrain     = pkt[13]
+            room.n_ai        = pkt[4]
+            room.ai_diff[0]  = pkt[5]
+            room.ai_diff[1]  = pkt[6]
+            room.ai_diff[2]  = pkt[7]
+            room.n_rounds    = pkt[8]
+            room.start_cash  = pkt[9]
+            room.wind_str    = pkt[10]
+            room.terrain     = pkt[11]
+            client.tank_type = pkt[12]
+            client.color_idx = pkt[13]
 
         client.room = room
         add_room(room)
@@ -400,6 +400,10 @@ def handle_join(client, pkt):
             room.clients.append(client)
             room.ready[client] = False
             client.room = room
+            # Read tank/color from join packet
+            if len(pkt) >= 6:
+                client.tank_type = pkt[4]
+                client.color_idx = pkt[5]
             log(f"JOIN: {client.name} joined room #{room_id} "
                 f"(slot {room.get_slot(client)}, {room.n_players}/{room.max_humans})")
             log_room(room)
