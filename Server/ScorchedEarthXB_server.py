@@ -28,8 +28,8 @@ PORT            = 20056         # Must match XBNET_DEFAULT_PORT in xb_net.h
 MAX_ROOMS       = 16            # Max concurrent rooms
 MAX_PLAYERS     = 4             # Max humans per room (2-4)
 MIN_PLAYERS     = 2             # Min humans required to start
-LOBBY_TIMEOUT_S = 600           # Seconds before empty room is auto-closed
-RECV_TIMEOUT_S  = 30            # Socket recv timeout (keepalive detection)
+LOBBY_TIMEOUT_S = 0             # Seconds before empty room is auto-closed
+RECV_TIMEOUT_S  = 90            # Socket recv timeout (keepalive detection)
 LOG_FILE        = "relay_server.log"
 LOG_TO_FILE     = True          # Also write log to file
 LOG_TO_STDOUT   = True          # Print log to console
@@ -51,6 +51,8 @@ SXBP_DISCONNECT  = 0xF9
 SXBP_PING        = 0xFA
 SXBP_PONG        = 0xFB
 SXBP_VOICE       = 0xFC
+SXBP_CREADY      = 0xFD
+SXBP_HOSTGO      = 0xFE
 
 PACKET_NAMES = {
     SXBP_HELLO:      "HELLO",
@@ -66,6 +68,8 @@ PACKET_NAMES = {
     SXBP_PING:       "PING",
     SXBP_PONG:       "PONG",
     SXBP_VOICE:      "VOICE",
+    SXBP_CREADY:     "CREADY",
+    SXBP_HOSTGO:     "HOSTGO",
 }
 
 # =============================================================================
@@ -442,6 +446,18 @@ def handle_ready(client, pkt):
     if should_start:
         start_game(room)
 
+def handle_relay_all(client, pkt, name):
+    """Relay a packet to all other clients in the room (CREADY, HOSTGO)."""
+    room = client.room
+    if not room:
+        return
+    with room.lock:
+        others = [c for c in room.clients if c is not client]
+    for c in others:
+        c.send(bytes(pkt))
+    log(f"{name}: relayed from {client.name} to {len(others)} peer(s)")
+
+
 def handle_voice(client, pkt):
     """Relay voice frame to all other players in the room.
     Voice packets are high-frequency -- log at DEBUG level only."""
@@ -477,8 +493,7 @@ def handle_turn(client, pkt):
 
     relay_pkt = build_turn_relay(slot, weapon_id, angle, power, sequence)
     for c in room.clients:
-        if c is not client:
-            c.send(relay_pkt)
+        c.send(relay_pkt)
 
 def start_game(room):
     """Broadcast GAMESTART to all clients with a shared seed."""
@@ -559,6 +574,8 @@ def client_thread(client: Client):
             elif ptype == SXBP_READY:  handle_ready (client, pkt)
             elif ptype == SXBP_TURN:   handle_turn  (client, pkt)
             elif ptype == SXBP_VOICE:  handle_voice (client, pkt)
+            elif ptype == SXBP_CREADY: handle_relay_all(client, pkt, "CREADY")
+            elif ptype == SXBP_HOSTGO:  handle_relay_all(client, pkt, "HOSTGO")
             elif ptype == SXBP_PING:
                 client.send(bytes([2, SXBP_PONG]))
             elif ptype == SXBP_PONG:
